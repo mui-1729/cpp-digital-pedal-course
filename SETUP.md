@@ -1,34 +1,15 @@
-# PC開発環境
+# 開発環境
 
-## Phase 0〜2: WSLでC++
+## 0〜14 共通編: WSLでC++
 
-確認:
+今までの環境をそのまま使います。
 
 ```bash
 g++ --version
 git --version
 ```
 
-サンプル:
-
-```bash
-mkdir hello-cpp
-cd hello-cpp
-code .
-```
-
-`main.cpp`:
-
-```cpp
-#include <iostream>
-
-int main() {
-    std::cout << "hello pedal" << std::endl;
-    return 0;
-}
-```
-
-実行:
+ビルド例:
 
 ```bash
 g++ -std=c++20 -Wall -Wextra -Wpedantic main.cpp -o app
@@ -45,12 +26,61 @@ git add .
 git commit -m "lesson 01: gain function"
 ```
 
-Git操作そのものを主目的にはしませんが、壊したら戻せる状態を維持します。
+壊したら戻れる状態を維持することが目的です。
 
-## Phase 3以降: Daisy
+---
 
-Daisy側はLesson 15到達時に最新版公式toolchain手順を確認して導入します。
+# Plugin Track: Windows native
 
-Windows環境では、DaisyのUSB書き込み部分を無理にWSLへ寄せず、公式手順に沿ってWindows側toolchainを使う方針です。
+Plugin Trackは**WSLではなくWindows側**で進めます。
 
-この時点でREADMEを更新し、実際に導入したtoolchain / libDaisy versionを記録します。
+理由:
+
+- Standalone appをそのままWindows audio deviceへ接続しやすい
+- Windows DAW/VST3 hostと同じ環境でbuild/debugできる
+- WSLのaudio/device bridgeを教材の本題にしない
+
+## 必要software
+
+P15開始日に公式要件を再確認したうえで、基本は以下。
+
+- Git for Windows
+- CMake 3.22以上
+- Visual Studio 2022以降のC++ toolchain
+  - `Desktop development with C++`
+- VS Codeは編集用として使用可
+- JUCEはprojectのCMakeが指定versionを取得する方式
+- DAWはP15時点では不要
+
+教材作成時点のpinは [PLUGIN-VERSIONS.md](PLUGIN-VERSIONS.md) を参照。
+
+## 推奨ディレクトリ
+
+Windows側の短いpathを使います。
+
+```text
+C:\dev\cpp-digital-pedal-course
+```
+
+WSLの`/mnt/c/...`からPluginをbuildする運用は、path/permission/build速度の問題を増やすため推奨しません。
+
+## Buildの基本形
+
+PowerShell Developer環境またはVisual StudioのCMake supportから:
+
+```powershell
+cmake -S plugin/work -B build/plugin -G "Visual Studio 17 2022" -A x64
+cmake --build build/plugin --config Debug
+```
+
+Standaloneを先に起動し、その後VST3 hostで確認します。
+
+---
+
+# Hardware Track: Daisy
+
+Hardware 15到達時に最新版公式toolchain手順を再確認して導入します。
+
+WindowsではDaisyのUSB書き込み部分を無理にWSLへ寄せず、公式手順に沿ってWindows側toolchainを使う方針です。
+
+実際に使用したtoolchain / libDaisy / board revisionは [HARDWARE-VERSIONS.md](HARDWARE-VERSIONS.md) へ記録します。

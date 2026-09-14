@@ -1,0 +1,14 @@
+# build outputs
+app
+*.o
+*.elf
+*.bin
+*.hex
+build/
+
+# generated data
+*.csv
+
+# editor
+.vscode/
+.DS_Store

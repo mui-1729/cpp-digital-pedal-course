@@ -8,6 +8,7 @@ Lesson 14までに学んだDSPを、JUCEの`processBlock()`から呼びます。
 
 - framework-independent DSP
 - adapter / bridge
+- CMakeのinclude path
 - channelごとのstate
 
 ## 重要な設計
@@ -25,12 +26,63 @@ shared/dsp/PedalEngine.h
 ## Hands-on
 
 1. `shared/dsp/PedalEngine.h`を読む。
-2. Processorへ`PedalEngine`を追加。
-3. `prepareToPlay()`でsample rateを渡す。
-4. `processBlock()`で1sampleずつ`Process()`する。
-5. mono/stereoそれぞれで確認。
+2. `plugin/work/CMakeLists.txt`へ共通DSPのinclude rootを追加する。
 
-### なぜPedalEngineをchannelごとに持つ？
+```cmake
+target_include_directories(MiniDigitalDrive
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/../../shared
+)
+```
+
+3. `PluginProcessor.h`から共通DSPをincludeする。
+
+```cpp
+#include "dsp/PedalEngine.h"
+```
+
+4. stereo用にchannelごとのinstanceを持つ。
+
+```cpp
+static constexpr std::size_t kMaxChannels = 2;
+std::array<pedal::PedalEngine, kMaxChannels> pedals_;
+```
+
+`<array>`もincludeする。
+
+5. `prepareToPlay()`で全instanceへsample rateを渡す。
+
+```cpp
+for (auto& pedal : pedals_) {
+    pedal.Prepare(static_cast<float>(sampleRate));
+    pedal.Reset();
+}
+```
+
+6. `processBlock()`で、処理するchannel数を2以下へ制限してから1sampleずつ`Process()`する。
+7. まずparameterは固定値でよい。例: DRIVE 4 / SAT 0.6 / TONE 0.6 / LEVEL 0.7。
+8. Standaloneでmono/stereoを確認する。
+9. P16のpassthroughへすぐ戻せるよう、変更をcommit前に`git diff`で確認する。
+
+## なぜCMakeにも設定が必要？
+
+C++の
+
+```cpp
+#include "dsp/PedalEngine.h"
+```
+
+だけではcompilerは`shared/`がどこにあるか知りません。`target_include_directories()`で探索開始地点を教えることで、
+
+```text
+shared/
+└── dsp/
+    └── PedalEngine.h
+```
+
+を見つけられるようになります。
+
+## なぜPedalEngineをchannelごとに持つ？
 
 Tone filterは「前回のsample」というstateを持ちます。左と右で同じinstanceを共有すると、channel間でstateが混ざります。
 
@@ -39,14 +91,33 @@ L → PedalEngine L
 R → PedalEngine R
 ```
 
+Distortionだけならstateを持たない部分もありますが、**Effect chain全体はstatefulになり得る**のでchannelごとに分けます。
+
 ## Challenge
 
 - DSP ON/OFF用の一時的な`bool`を作りA/Bする。
 - Distortionを外してToneだけにした場合の差を確認する。
+- `target_include_directories()`を一度コメントアウトし、compiler errorを読んでから戻す。
+
+## よくあるエラー
+
+### `dsp/PedalEngine.h: No such file or directory`
+
+CMakeのinclude path追加後に再configureする。
+
+```powershell
+cmake -S plugin/work -B build/plugin -G "Visual Studio 17 2022" -A x64
+cmake --build build/plugin --config Debug
+```
+
+### stereoの左右で挙動がおかしい
+
+1個のstateful `PedalEngine`を左右で共有していないか確認する。
 
 ## 合格条件
 
 - JUCE依存コードとDSPコードを分離できる
+- CMakeのinclude pathが何をしているか説明できる
 - stateful effectをstereo channel間で共有してはいけない理由を説明できる
 - `PedalEngine`をDaisyにも持っていける理由を説明できる
 
@@ -54,6 +125,7 @@ R → PedalEngine R
 
 ```bash
 git status
+git diff
 git add .
 git commit -m "plugin p17: connect shared pedal engine"
 ```

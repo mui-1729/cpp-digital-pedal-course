@@ -19,6 +19,43 @@ python tools/generate_test_audio.py
 
 DSPの動作・clip・filter・meter検証用です。
 
+## ギターなしでbefore / afterを聴く
+
+`tools/process_wav.cpp`は、16-bit PCMのmono/stereo WAVを`shared/dsp/PedalEngine.h`へ通して新しいWAVを書き出す小さなoffline runnerです。
+
+WSL/Linuxでbuild:
+
+```bash
+mkdir -p build/tools
+g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror \
+  -Ishared tools/process_wav.cpp -o build/tools/process_wav
+```
+
+例:
+
+```bash
+./build/tools/process_wav \
+  test-audio/generated/two-tone.wav \
+  test-audio/generated/two-tone-processed.wav \
+  5.0 0.7 0.55 0.7
+```
+
+引数は:
+
+```text
+INPUT OUTPUT [DRIVE] [SAT] [TONE] [LEVEL]
+```
+
+出力WAVを普通の音楽プレイヤーで聞き比べれば、ギターもDAWもなくDSPのbefore/afterを確認できます。
+
+このtoolは**Plugin wrapperそのものの検証ではありません**。P23では役割を分けます。
+
+```text
+process_wav.cpp → shared DSPの音/数値を確認
+pluginval       → VST3 wrapper/APIの妥当性を確認
+Standalone      → device/GUI/parameterの統合を確認
+```
+
 ## ギターを一度使える日に録る
 
 clean / effect OFFで自分の演奏を録っておくと、ギターが手元にない日でも開発できます。
@@ -35,6 +72,8 @@ clean / effect OFFで自分の演奏を録っておくと、ギターが手元�
 | `guitar-dynamics.wav` | 弱く→強く弾く |
 
 録音レベルをclipさせず、できれば同じinput gainで揃えます。
+
+`process_wav`の教育用readerは**PCM 16-bit / monoまたはstereo**に限定しています。別formatの録音はDAW等で16-bit PCM WAVへexportしてから使います。
 
 ## 目的
 

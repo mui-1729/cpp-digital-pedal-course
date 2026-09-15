@@ -2,7 +2,8 @@
 #include "PluginEditor.h"
 
 namespace {
-constexpr double kSmoothingSeconds = 0.03;
+constexpr double kParameterSmoothingSeconds = 0.03;
+constexpr double kBypassSmoothingSeconds = 0.01;
 }
 
 MiniDigitalDriveAudioProcessor::MiniDigitalDriveAudioProcessor()
@@ -17,15 +18,22 @@ void MiniDigitalDriveAudioProcessor::prepareToPlay(double sampleRate, int) {
         pedal.Reset();
     }
 
-    drive_.reset(sampleRate, kSmoothingSeconds);
-    saturation_.reset(sampleRate, kSmoothingSeconds);
-    tone_.reset(sampleRate, kSmoothingSeconds);
-    level_.reset(sampleRate, kSmoothingSeconds);
+    drive_.reset(sampleRate, kParameterSmoothingSeconds);
+    saturation_.reset(sampleRate, kParameterSmoothingSeconds);
+    level_.reset(sampleRate, kParameterSmoothingSeconds);
+    bypassMix_.reset(sampleRate, kBypassSmoothingSeconds);
 
     drive_.setCurrentAndTargetValue(*apvts_.getRawParameterValue("drive"));
     saturation_.setCurrentAndTargetValue(*apvts_.getRawParameterValue("saturation"));
-    tone_.setCurrentAndTargetValue(*apvts_.getRawParameterValue("tone"));
     level_.setCurrentAndTargetValue(*apvts_.getRawParameterValue("level"));
+
+    const float tone = *apvts_.getRawParameterValue("tone");
+    for (auto& pedal : pedals_) {
+        pedal.SetTone(tone);
+    }
+
+    const bool bypass = *apvts_.getRawParameterValue("bypass") >= 0.5f;
+    bypassMix_.setCurrentAndTargetValue(bypass ? 1.0f : 0.0f);
 }
 
 void MiniDigitalDriveAudioProcessor::releaseResources() {}
@@ -60,38 +68,39 @@ void MiniDigitalDriveAudioProcessor::processBlock(
     }
     inputPeak_.store(inPeak, std::memory_order_relaxed);
 
-    const bool bypass = *apvts_.getRawParameterValue("bypass") >= 0.5f;
-
     drive_.setTargetValue(*apvts_.getRawParameterValue("drive"));
     saturation_.setTargetValue(*apvts_.getRawParameterValue("saturation"));
-    tone_.setTargetValue(*apvts_.getRawParameterValue("tone"));
     level_.setTargetValue(*apvts_.getRawParameterValue("level"));
 
-    if (!bypass) {
-        const int channelsToProcess = std::min(inputChannels, static_cast<int>(kMaxChannels));
+    // Tone coefficient math includes pow/exp, so update its target once per block.
+    // OnePoleTone performs cheap per-sample interpolation of the coefficient.
+    const float tone = *apvts_.getRawParameterValue("tone");
+    for (auto& pedal : pedals_) {
+        pedal.SetTone(tone);
+    }
 
-        for (int sample = 0; sample < numSamples; ++sample) {
-            const float drive = drive_.getNextValue();
-            const float saturation = saturation_.getNextValue();
-            const float tone = tone_.getNextValue();
-            const float level = level_.getNextValue();
+    const bool bypass = *apvts_.getRawParameterValue("bypass") >= 0.5f;
+    bypassMix_.setTargetValue(bypass ? 1.0f : 0.0f);
 
-            for (int channel = 0; channel < channelsToProcess; ++channel) {
-                auto& pedal = pedals_[static_cast<std::size_t>(channel)];
-                pedal.SetDrive(drive);
-                pedal.SetSaturation(saturation);
-                pedal.SetTone(tone);
-                pedal.SetLevel(level);
+    const int channelsToProcess = std::min(inputChannels, static_cast<int>(kMaxChannels));
 
-                auto* data = buffer.getWritePointer(channel);
-                data[sample] = pedal.Process(data[sample]);
-            }
+    for (int sample = 0; sample < numSamples; ++sample) {
+        const float drive = drive_.getNextValue();
+        const float saturation = saturation_.getNextValue();
+        const float level = level_.getNextValue();
+        const float bypassMix = bypassMix_.getNextValue();
+
+        for (int channel = 0; channel < channelsToProcess; ++channel) {
+            auto& pedal = pedals_[static_cast<std::size_t>(channel)];
+            pedal.SetDrive(drive);
+            pedal.SetSaturation(saturation);
+            pedal.SetLevel(level);
+
+            auto* data = buffer.getWritePointer(channel);
+            const float dry = data[sample];
+            const float wet = pedal.Process(dry);
+            data[sample] = wet + (dry - wet) * bypassMix;
         }
-    } else {
-        drive_.skip(numSamples);
-        saturation_.skip(numSamples);
-        tone_.skip(numSamples);
-        level_.skip(numSamples);
     }
 
     float outPeak = 0.0f;

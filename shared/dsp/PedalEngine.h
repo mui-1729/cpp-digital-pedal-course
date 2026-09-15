@@ -33,7 +33,15 @@ class OnePoleTone {
 public:
     void Prepare(float sampleRate) {
         sampleRate_ = std::max(sampleRate, 1.0f);
-        SetTone(tone_);
+
+        // About 20 ms of coefficient smoothing. Heavy cutoff math is done only
+        // when SetTone() is called; the audio-rate path below uses cheap lerping.
+        constexpr float kSmoothingSeconds = 0.02f;
+        smoothingCoefficient_ =
+            1.0f - std::exp(-1.0f / (sampleRate_ * kSmoothingSeconds));
+
+        targetAlpha_ = CalculateAlpha(tone_);
+        alpha_ = targetAlpha_;
         Reset();
     }
 
@@ -43,23 +51,29 @@ public:
 
     void SetTone(float normalized) {
         tone_ = std::clamp(normalized, 0.0f, 1.0f);
-
-        // 500 Hz -> 8000 Hz on a logarithmic curve.
-        const float cutoff = 500.0f * std::pow(16.0f, tone_);
-        const float safeCutoff = std::min(cutoff, sampleRate_ * 0.45f);
-        constexpr float kPi = 3.14159265358979323846f;
-        alpha_ = 1.0f - std::exp(-2.0f * kPi * safeCutoff / sampleRate_);
+        targetAlpha_ = CalculateAlpha(tone_);
     }
 
     float Process(float input) {
+        alpha_ += smoothingCoefficient_ * (targetAlpha_ - alpha_);
         state_ += alpha_ * (input - state_);
         return state_;
     }
 
 private:
+    float CalculateAlpha(float normalized) const {
+        // 500 Hz -> 8000 Hz on a logarithmic curve.
+        const float cutoff = 500.0f * std::pow(16.0f, normalized);
+        const float safeCutoff = std::min(cutoff, sampleRate_ * 0.45f);
+        constexpr float kPi = 3.14159265358979323846f;
+        return 1.0f - std::exp(-2.0f * kPi * safeCutoff / sampleRate_);
+    }
+
     float sampleRate_ = 48000.0f;
     float tone_ = 0.6f;
     float alpha_ = 1.0f;
+    float targetAlpha_ = 1.0f;
+    float smoothingCoefficient_ = 1.0f;
     float state_ = 0.0f;
 };
 

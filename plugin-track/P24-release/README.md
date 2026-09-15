@@ -12,6 +12,7 @@
 - state restore
 - input/output meter
 - validation log
+- reproducible test audio workflow
 
 ## Release candidate checklist
 
@@ -19,28 +20,41 @@
 
 - [ ] Release build
 - [ ] Standalone起動
-- [ ] VST3 host load
+- [ ] VST3 binary生成
+- [ ] pluginvalでVST3をload/validate
 - [ ] debug専用codeなし
 - [ ] version番号確認
 
+DAW/別Hostを持っている場合はVST3 scan/loadも追加で確認しますが、**Plugin Track修了の必須条件にはしません**。
+
 ### DSP
 
+- [ ] generated WAVをoffline runnerで処理
 - [ ] silenceで安定
 - [ ] parameter min/maxで安定
 - [ ] output clipを意図的に管理
-- [ ] 44.1/48/96kHz確認
+- [ ] 44.1/48/96kHzを可能な範囲で確認
 - [ ] mono/stereo確認
 
 ### State
 
-- [ ] save/reload
+- [ ] Standalone normal quit → restartでstate restore
 - [ ] bypass restore
-- [ ] old state compatibility方針を記録
+- [ ] Parameter ID互換性の方針を記録
+
+### Real-time design
+
+- [ ] audio sample loopでallocationしない
+- [ ] audio sample loopでlog/GUI更新しない
+- [ ] Toneの`pow/exp`係数計算をsampleごとに行っていない
+- [ ] bypassは短いcrossfadeで不連続を避ける
+- [ ] meterはatomic経由でGUIへ渡す
 
 ### Docs
 
 - [ ] `PLUGIN-VERSIONS.md`記録
-- [ ] `plugin/VALIDATION.md`
+- [ ] `plugin/VALIDATION.md`記録
+- [ ] `plugin/PRESETS.md`へ最低2設定
 - [ ] known issues
 - [ ] controls説明
 
@@ -54,40 +68,56 @@ binaryを他人へ配布する前に**その日の公式情報**を再確認:
 - VST trademark/logo rules
 - third-party assets/code
 
-教材作成時点ではJUCE 9.0.2がcurrent、VST3 SDK 3.8以降はMITですが、配布日には再確認します。
+教材作成時点ではJUCE 9.0.2をpinし、VST3 SDK 3.8以降はMITですが、配布日には再確認します。
 
-## 最後のChallenge
+## 最後のChallenge — ギターなしでも可能
 
-同じclean guitar clipを:
+同じtest sourceを最低5設定で処理します。
 
-1. bypass
-2. low drive
-3. high drive
-4. high SAT
-5. dark tone
+例:
 
-で書き出し、自分の言葉で音の違いを記録する。
+1. low drive
+2. high drive
+3. hard寄りSAT
+4. soft寄りSAT
+5. dark / bright tone
+
+入力は`two-tone.wav`や`sweep.wav`で構いません。before/afterを普通の音楽プレイヤーで聞き、自分の言葉で違いを記録します。
+
+後日ギターを使える日に、同じ5設定をclean guitar clipまたは実演でも確認すると主観評価がさらに良くなります。
 
 ## Plugin Track修了条件
 
-- 自分でbuildできる
-- `processBlock()`からPedalEngineまで追える
-- parameter/state/GUI/threadの役割を説明できる
-- validationできる
+- 自分でJUCE projectをconfigure/buildできる
+- StandaloneとVST3の違いを説明できる
+- `processBlock()`から`shared/dsp/PedalEngine.h`まで処理を追える
+- parameter / state / GUI / audio thread / message threadの役割を説明できる
+- guitar/DAWなしでもoffline WAV + Standalone + pluginvalで検証できる
 - 「次にSATをどう改造したいか」を1つ設計できる
 
-## 次へ
+## ここで得られるもの
 
-ここでPCだけで修了してもよい。
+この時点でPCルートは独立して修了です。
 
-実機化したい場合はHardware 15へ進み、**同じDSPをDaisyへ移植**する。
+```text
+C++
+ ↓
+shared DSP
+ ↓
+JUCE AudioProcessor
+ ↓
+VST3 / Standalone
+```
+
+実機化したい場合だけHardware 15へ進み、**同じDSP coreをDaisyへ移植**します。
 
 ## Git checkpoint
 
 ```bash
 git status
+git diff
 git add .
 git commit -m "plugin p24: finish mini digital drive"
 ```
 
-合格条件を満たしてから次へ進みます。`plugin/reference-final/`は詰まった時か答え合わせ時だけ見ます。
+このcommitをPlugin Track v1の基準点として残します。

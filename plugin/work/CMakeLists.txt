@@ -16,8 +16,8 @@ FetchContent_MakeAvailable(JUCE)
 juce_add_plugin(MiniDigitalDrive
     COMPANY_NAME "mui-1729 learning"
     BUNDLE_ID "com.mui1729.learning.minidigitaldrive"
-    PLUGIN_MANUFACTURER_CODE MUI1
-    PLUGIN_CODE MDD1
+    PLUGIN_MANUFACTURER_CODE Mui1
+    PLUGIN_CODE Mdd1
     PRODUCT_NAME "Mini Digital Drive"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE

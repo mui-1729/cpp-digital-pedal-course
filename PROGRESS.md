@@ -24,19 +24,52 @@
 - [ ] 13 Delay
 - [ ] 14 Mini Pedal Engine
 
+### Branch Point
+
+- [ ] PCだけで完成品を作りたい → Plugin Track
+- [ ] 実機を先に触りたい → Hardware Track
+- [ ] 推奨: Plugin Track → Hardware Track
+
+---
+
+## Plugin Track
+
+- [ ] P15 JUCE / CMake / first Standalone
+- [ ] P16 processBlock / passthrough
+- [ ] P17 shared PedalEngine
+- [ ] P18 parameters / automation
+- [ ] P19 saturation / smoothing
+- [ ] P20 GUI / attachments
+- [ ] P21 state / preset / A-B
+- [ ] P22 meters / threading
+- [ ] P23 validation / sample rates / block sizes
+- [ ] P24 VST3 + Standalone release candidate
+
+### Plugin Finish Gate
+
+- [ ] Standaloneが起動
+- [ ] VST3がhostで読み込める
+- [ ] state restore確認
+- [ ] mono/stereo確認
+- [ ] 44.1/48/96kHz確認
+- [ ] 複数block size確認
+- [ ] validation実行
+- [ ] licence/release checklist確認
+
+---
+
+## Hardware Track Phase 3 — Daisy
+
 ### Gate A
 
-- [ ] Lesson 14まで続けられた
 - [ ] 実機へ進みたい
 - [ ] Daisy Seed3購入内容を最新資料で確認
-
-## Phase 3 — Daisy
 
 - [ ] 15 first flash
 - [ ] 16 GPIO
 - [ ] 17 ADC/POT
 - [ ] 18 audio callback
-- [ ] 19 PedalEngine port
+- [ ] 19 shared PedalEngine port
 
 ## Phase 4 — Guitar
 

@@ -4,11 +4,13 @@
 
 1. **必要になる前に買わない**
 2. 借りられる工具は借りる
-3. 消耗品・自分の制作物になる部品を優先して買う
-4. ハードウェア回路部品は、最新公式回路を確認してから確定する
-5. 値段は変動するので、教材内価格は目安に留める
+3. ソフトウェアだけで学べる区間を先に終える
+4. ハードウェア回路部品は最新公式回路を確認してから確定する
+5. 値段は変動するので教材内価格は目安に留める
 
-## 今〜Lesson 14
+---
+
+## Lesson 00〜14
 
 追加購入: **0円**
 
@@ -20,22 +22,56 @@
 - g++
 - Git
 
-すでに持っているギターやHX Stompは、まだ使わなくても進められます。
+ギター/HX Stompはなくても進められます。
 
-## Purchase Gate A — Lesson 15直前
+---
+
+## Plugin Track P15〜P24
+
+追加ハードウェア: **0円**
+
+必要software:
+
+- Windows native C++ toolchain
+- CMake
+- Git
+- JUCE（CMakeでpinしたversionを取得）
+- Standalone target
+
+任意:
+
+- DAW / VST3 host
+- pluginval
+- headphones
+- HX StompをUSB audio interfaceとして使う
+- ギター
+
+### ギターがない日の代替
+
+- `tools/generate_test_audio.py`で生成するsine/sweep/transient
+- 自分で事前録音したclean guitar WAV
+- DAW/hostに読み込める任意の権利クリアな音源
+
+`test-audio/README.md`を参照。
+
+---
+
+# Hardware Track
+
+## Purchase Gate A — Hardware 15直前
 
 ### 購入推奨
 
 | 品物 | 数 | 用途 | 備考 |
 |---|---:|---|---|
-| Daisy Seed3 | 1 | DSP本体 | その時点の公式在庫/価格を再確認 |
-| Breadboard（大きめ） | 1 | 配線 | Seed3 + pot + switchを載せられるもの |
+| Daisy Seed3 | 1 | DSP本体 | 購入日に公式在庫/価格を再確認 |
+| Breadboard（大きめ） | 1 | 配線 | Seed3 + pot + switch |
 | Jumper wire | 1 set | 配線 | male-male中心 |
-| LED | 3〜5 | 状態表示 | 色は任意 |
-| 抵抗セット | 1 | LED/回路 | まず汎用セットでよい |
+| LED | 3〜5 | 状態表示 | 色任意 |
+| 抵抗セット | 1 | LED/回路 | 汎用セット |
 | Tactile switch | 2〜3 | GPIO | breadboard向け |
 | 10kΩ linear pot | 3 | GAIN/TONE/LEVEL | Bカーブ相当 |
-| USB-C data cable | 1 | 書込/電源 | 充電専用ケーブル不可 |
+| USB-C data cable | 1 | 書込/電源 | 充電専用不可 |
 
 ### 借りられるなら購入不要
 
@@ -53,9 +89,9 @@
 - はんだごて
 - 高価なAudio Analyzer
 
-## Lesson 20
+## Hardware 20
 
-手持ち機材を活用します。
+手持ち機材を活用可能:
 
 - Guitar
 - HX Stomp
@@ -65,38 +101,33 @@
 
 HX Stompを一時的にinstrument↔lineの橋渡しとして使います。
 
-## Purchase Gate B — Lesson 21〜23
+## Purchase Gate B — Hardware 21〜23
 
-ここで初めて「単体のギター用入出力回路」を作ります。
+単体のギター用入出力回路を作ります。
 
-### 買う前に必ず行うこと
+買う前に:
 
-- Seed3の最新版datasheetを確認
-- 公式Typical Application Circuitを確認
-- errata / current community announcementを確認
-- 使用するop-amp / supply voltage / bias circuitを決める
-- BOMを`hardware/BOM-FROZEN.md`としてfreezeする
+- Seed3最新版datasheet確認
+- 公式Typical Application Circuit確認
+- errata / current announcement確認
+- op-amp / supply / bias決定
+- `hardware/BOM-FROZEN.md`としてfreeze
 
-Seed3関連資料は2026年にも更新・訂正があったため、教材作成時に固定した値を未来まで盲信しない設計です。
-
-### 想定カテゴリー
+想定カテゴリー:
 
 - dual op-amp
 - resistors
 - capacitors
-- ferrite / filtering parts（必要に応じて）
-- audio jack temporary breakout
-- 9V supply related parts
+- filtering parts
+- audio jack breakout
+- power related parts
 
-## Purchase Gate C — Lesson 24
+## Purchase Gate C — Hardware 24
 
-最終ペダル化。
-
-- Enclosure（最初は余裕あるサイズ推奨）
+- Enclosure
 - 1/4 inch TS jack ×2
-- 3PDTまたは採用するbypass方式のswitch
-- Pot ×3
-- Knob ×3
+- bypass switch
+- Pot / knob
 - LED + bezel
 - DC jack
 - wire
@@ -106,7 +137,7 @@ Seed3関連資料は2026年にも更新・訂正があったため、教材作�
 
 ## 工具
 
-### 借りられれば買わなくてよい
+借りられれば買わなくてよい:
 
 - temperature-controlled soldering iron
 - solder
@@ -115,24 +146,16 @@ Seed3関連資料は2026年にも更新・訂正があったため、教材作�
 - multimeter
 - vise
 
-### 自分で持っていると便利
-
-- cheap multimeter
-- small nipper
-- wire stripper
-
-## 予算の考え方
-
-総額を一括で考えません。
+## お金を使う順番
 
 ```text
-Phase 0-2: 0円
-    ↓ 続けたい
-Phase 3: Daisy + 基本部品
-    ↓ 実ギターで楽しい
-Phase 5: Audio回路部品
-    ↓ 単体化したい
-Phase 6: ケース・switch・仕上げ
+00〜14                  0円
+  ↓
+P15〜P24 Plugin Track   0円（既存PC前提）
+  ↓ 実物にしたい
+Hardware 15〜20         Daisy + 基本部品
+  ↓
+Hardware 21〜23         Audio回路
+  ↓
+Hardware 24             ケース・仕上げ
 ```
-
-工具を借りられる場合、総コストをかなり下げられます。

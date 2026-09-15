@@ -1,117 +1,150 @@
 # C++で作るデジタル・ギターエフェクター入門
 
-paiza C++体験編とDランク問題を終えた人が、**C++ → DSP → マイコン → ギター用電子回路 → 実機ペダル**まで一本の流れで学ぶためのハンズオン教材です。
+paiza C++体験編とDランク問題を終えた人が、**C++ → DSP → PCプラグイン → マイコン → ギター用電子回路 → 実機ペダル**まで一本の流れで学ぶハンズオン教材です。
 
 ## この教材の前提
 
 - C++で `cout` / `cin` / 変数 / `if` / `for` / `while` を一度は使ったことがある
 - 完璧な文法暗記は不要
-- 「必要になったC++を、その場でエフェクターに使う」方式で進む
-- 前半はPCだけ。Daisy Seed3などは購入タイミングまで買わない
+- 「必要になったC++を、その場で音の処理に使う」方式で進む
+- Lesson 14まではPCだけ
+- 推奨ルートでは、その後もPlugin Trackを終えるまで追加ハードウェア購入0円
+- ギターが手元にない日でも、生成したテスト信号や録音済みWAVで進められる
 
-## 最終ゴール
+## 2つの最終成果物
 
-自分で以下を説明・実装・配線・デバッグできる状態を目指します。
+Lesson 00〜14で共通のDSPエンジンを作った後、2つのTrackへ分岐します。
 
 ```text
-Guitar
-  ↓
-Instrument Input / Buffer
-  ↓
-Daisy Seed3
-  ↓
-C++ DSP
-  ├─ Gain
-  ├─ Distortion
-  ├─ Tone
-  └─ Output Level
-  ↓
-Output Stage
-  ↓
-Amp / HX Stomp / Audio Interface
+Lesson 00〜14
+C++ + DSP 共通編
+      │
+      ▼
+  PedalEngine
+   /      \
+  /        \
+Plugin     Hardware
+Track      Track
+  │          │
+  ▼          ▼
+VST3 /      Daisy Seed3
+Standalone  実機ペダル
 ```
 
-最終制作は、GAIN / TONE / LEVEL、フットスイッチ、LEDを備えた小型デジタルドライブです。
+### Plugin Track
+
+PCだけで **Mini Digital Drive** を作ります。
+
+- VST3
+- Standalone app
+- DRIVE / SAT / TONE / LEVEL / BYPASS
+- GUI
+- parameter automation
+- state / preset
+- meter
+- plugin validation
+- release checklist
+
+### Hardware Track
+
+同じDSPをDaisy Seed3へ移植します。
+
+- GPIO / LED / switch
+- ADC / POT
+- real-time audio callback
+- HX Stomp経由の実ギター確認
+- guitar input / output circuit
+- enclosure
+- 最終的にケース入りデジタルペダル
+
+## 推奨ルート
+
+```text
+00〜14 共通編
+   ↓
+P15〜P24 Plugin Track
+   ↓
+「このDSPを実物にしたい」と思ったら
+   ↓
+15〜24 Hardware Track
+```
+
+先に実機へ行きたい場合は、Lesson 14からHardware 15へ直接進んでも構いません。
 
 ## 教材の進め方
 
-各回は次の順で進みます。
+各Lessonは原則として次の順で進みます。
 
 1. **今日作るものを見る**
-2. `starter/` を自分で変更する
-3. 動かして結果を確認する
-4. READMEの解説を読む
+2. 既存コードを動かす
+3. 新しい概念を必要な分だけ学ぶ
+4. 自分で変更する
 5. Challengeを解く
-6. `solution/` で答え合わせする
-7. 合格条件を満たしたら次へ進む
-8. Gitでcheckpointを残す
+6. 合格条件を満たす
+7. Gitでcheckpointを残す
 
-完成コードを最初から写すことは推奨しません。
+Plugin Trackは複数ファイルの実プロジェクトを育てるため、`starter/solution`を毎回丸ごと複製せず、`plugin/work/`をLessonごとに更新していきます。最終形は`plugin/reference-final/`で確認できます。
 
-## 25回の全体像
+## 全体構成
 
 詳しくは [CURRICULUM.md](CURRICULUM.md) を参照してください。
 
-- Phase 0: 準備
+- Phase 0: 開発環境
 - Phase 1: C++基礎 × エフェクター
 - Phase 2: DSP基礎
-- Phase 3: Daisy Seed3 / 物理世界
-- Phase 4: 実ギターをリアルタイム処理
-- Phase 5: ギター用電子回路
-- Phase 6: ケース入りペダル完成
+- Plugin Track: JUCE / VST3 / Standalone
+- Hardware Track Phase 3: Daisy Seed3
+- Hardware Track Phase 4: 実ギター
+- Hardware Track Phase 5: ギター用電子回路
+- Hardware Track Phase 6: ケース入りペダル
 
-## まず読むファイル
+## 最初に読むファイル
 
 1. [SETUP.md](SETUP.md)
-2. [MATERIALS.md](MATERIALS.md)
-3. [SAFETY.md](SAFETY.md)
+2. [CURRICULUM.md](CURRICULUM.md)
+3. [MATERIALS.md](MATERIALS.md)
 4. [BUDGET.md](BUDGET.md)
-5. [PROGRESS.md](PROGRESS.md)
-6. [lessons/00-course-setup/README.md](lessons/00-course-setup/README.md)
+5. [SAFETY.md](SAFETY.md)
+6. [PROGRESS.md](PROGRESS.md)
+7. [lessons/00-course-setup/README.md](lessons/00-course-setup/README.md)
+
+Plugin Track開始時は [PLUGIN-TRACK.md](PLUGIN-TRACK.md) と [PLUGIN-VERSIONS.md](PLUGIN-VERSIONS.md) も読みます。
 
 ## 買い物ルール
 
-**第14回までは追加購入0円で進める**設計です。
+**推奨ルートならPlugin Track修了まで追加ハードウェア0円**です。
 
-- 第15回直前: Daisy Seed3 + breadboard + 基本電子部品
-- 第20回まではHX Stompを信号レベル調整の橋渡しに利用可能
-- 第21回以降: ギター入力/出力回路用部品
-- 第24回: ケース、ジャック、フットスイッチなど
+- Lesson 00〜14: PCのみ
+- P15〜P24: PCのみ。DAWは必須ではなくStandaloneで進められる
+- Hardware 15直前: Daisy Seed3 + breadboard + 基本電子部品
+- Hardware 20: 手持ちのHX Stompとギターを活用可能
+- Hardware 21以降: ギター入出力回路用部品
+- Hardware 24: ケース、ジャック、フットスイッチなど
 
 詳細は [MATERIALS.md](MATERIALS.md)。
 
-## 大事なルール
+## コードの中心
 
-- アンプの **SPEAKER OUTを絶対にDaisy / HX Stomp / PCへ接続しない**
-- DaisyのADCには規定範囲外の電圧を入れない
-- 配線変更は原則として電源OFFで行う
-- 最初はヘッドホン/アンプ音量を十分下げる
-- 実機回路は、使用時点のSeed3公式資料を再確認する
+共通DSPはJUCEにもDaisyにも依存させません。
 
-安全については [SAFETY.md](SAFETY.md) を必ず読んでください。
-
-## コードの方針
-
-PC編は以下でビルドします。
-
-```bash
-g++ -std=c++20 -Wall -Wextra -Wpedantic main.cpp -o app
-./app
+```text
+shared/dsp/
+└── PedalEngine.h
+       ↑
+       ├── plugin/
+       └── hardware/
 ```
 
-`-Wall -Wextra -Wpedantic` を最初から使い、警告を無視しない習慣を付けます。
-
-Daisy編ではlibDaisy公式のプロジェクト構成に切り替えます。
+「音を変えるロジック」と「PC/実機の入出力」を分離すること自体が、この教材の重要な学習目標です。
 
 ## Source of truth
 
-ハードウェアやAPIは更新されるため、[SOURCES.md](SOURCES.md) に一次資料をまとめています。
-特にLesson 21以降の回路値は、教材作成時点の記憶ではなく**その時点のSeed3公式資料**を確認してから確定します。
+API・framework・hardwareは更新されるため、[SOURCES.md](SOURCES.md) に一次資料をまとめています。
 
-## 補助資料
+- Plugin Track: JUCE / Steinberg VST3 / pluginval の公式情報
+- Hardware Track: Daisy / libDaisy の公式情報
+- Lesson 21以降の回路値: **作業時点のSeed3公式資料を再確認してから確定**
 
-- [CHECK-ANSWERS.md](CHECK-ANSWERS.md) — 確認問題の解答
-- [LEARNING-LOG.md](LEARNING-LOG.md) — 学習記録
-- [HARDWARE-VERSIONS.md](HARDWARE-VERSIONS.md) — 実機version固定
-- [IMPORT-TO-GITHUB.md](IMPORT-TO-GITHUB.md) — GitHubへ移す
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — 切り分け
+## 安全
+
+Hardware Trackでは [SAFETY.md](SAFETY.md) を必ず読んでください。特にアンプの **SPEAKER OUTをDaisy / HX Stomp / PCへ接続しない**こと。

@@ -1,0 +1,54 @@
+name: core-dsp
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show tool versions
+        run: |
+          g++ --version
+          python3 --version
+
+      - name: Build offline WAV runner
+        run: |
+          mkdir -p build/tools
+          g++ -std=c++20 -Wall -Wextra -Wpedantic -Werror \
+            -Ishared tools/process_wav.cpp \
+            -o build/tools/process_wav
+
+      - name: Generate deterministic test audio
+        run: python3 tools/generate_test_audio.py
+
+      - name: Process test WAV through shared DSP
+        run: |
+          build/tools/process_wav \
+            test-audio/generated/two-tone.wav \
+            test-audio/generated/two-tone-processed.wav \
+            5.0 0.7 0.55 0.7
+
+      - name: Validate output WAV header and length
+        run: |
+          python3 - <<'PY'
+          import wave
+
+          before = "test-audio/generated/two-tone.wav"
+          after = "test-audio/generated/two-tone-processed.wav"
+
+          with wave.open(before, "rb") as a, wave.open(after, "rb") as b:
+              assert a.getnchannels() == b.getnchannels()
+              assert a.getsampwidth() == b.getsampwidth() == 2
+              assert a.getframerate() == b.getframerate() == 48_000
+              assert a.getnframes() == b.getnframes()
+              assert a.readframes(a.getnframes()) != b.readframes(b.getnframes())
+
+          print("core DSP WAV smoke test passed")
+          PY

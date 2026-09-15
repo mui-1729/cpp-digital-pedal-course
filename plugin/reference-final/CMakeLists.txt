@@ -27,6 +27,9 @@ juce_add_plugin(MiniDigitalDrive
     FORMATS VST3 Standalone
 )
 
+# The source uses <JuceHeader.h>, so explicitly generate it for this target.
+juce_generate_juce_header(MiniDigitalDrive)
+
 target_sources(MiniDigitalDrive
     PRIVATE
         Source/PluginProcessor.cpp

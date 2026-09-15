@@ -49,8 +49,8 @@ private:
 
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> drive_;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> saturation_;
-    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> tone_;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> level_;
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> bypassMix_;
 
     std::atomic<float> inputPeak_{0.0f};
     std::atomic<float> outputPeak_{0.0f};

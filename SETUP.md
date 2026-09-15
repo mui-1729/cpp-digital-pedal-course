@@ -45,9 +45,10 @@ Plugin Trackは**WSLではなくWindows側**で進めます。
 P15開始日に公式要件を再確認したうえで、基本は以下。
 
 - Git for Windows
-- CMake 3.22以上
-- Visual Studio 2022以降のC++ toolchain
-  - `Desktop development with C++`
+- CMake（P15開始日にcurrent stableを確認）
+- current Visual StudioのC++ toolchain
+  - 2026-09-15時点ではVisual Studio 2026が現行
+  - `Desktop development with C++` workload
 - VS Codeは編集用として使用可
 - JUCEはprojectのCMakeが指定versionを取得する方式
 - DAWはP15時点では不要
@@ -66,12 +67,22 @@ WSLの`/mnt/c/...`からPluginをbuildする運用は、path/permission/build速
 
 ## Buildの基本形
 
-PowerShell Developer環境またはVisual StudioのCMake supportから:
+**Developer PowerShell for Visual Studio**を開いてrepo rootへ移動し、まずgeneratorを固定せずconfigureします。
 
 ```powershell
-cmake -S plugin/work -B build/plugin -G "Visual Studio 17 2022" -A x64
+cmake -S plugin/work -B build/plugin
 cmake --build build/plugin --config Debug
 ```
+
+これなら教材が特定のVisual Studio世代名に依存しません。
+
+複数toolchainが入っていてCMakeが意図しないgeneratorを選ぶ場合だけ、
+
+```powershell
+cmake --help
+```
+
+で自分の環境に存在するgenerator名を確認し、`-G`を明示します。古い教材から`Visual Studio 17 2022`をそのままコピーしないこと。
 
 Standaloneを先に起動し、その後VST3 hostで確認します。
 

@@ -1,6 +1,6 @@
 #include <iostream>
 
 int main() {
-    std::cout << "mini pedal course start" << std::endl;
+    std::cout << "stomp pedal" << std::endl;
     return 0;
 }

@@ -106,9 +106,11 @@ Distortionだけならstateを持たない部分もありますが、**Effect ch
 CMakeのinclude path追加後に再configureする。
 
 ```powershell
-cmake -S plugin/work -B build/plugin -G "Visual Studio 17 2022" -A x64
+cmake -S plugin/work -B build/plugin
 cmake --build build/plugin --config Debug
 ```
+
+それでも別generatorを選びたい場合だけ`cmake --help`で利用可能なgeneratorを確認する。
 
 ### stereoの左右で挙動がおかしい
 

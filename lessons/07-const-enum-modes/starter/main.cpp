@@ -3,25 +3,44 @@
 #include <iostream>
 
 // TODO: enum class ClipMode
+enum class ClipMode
+{
+    Hard,
+    Soft
+};
 
-class Distortion {
+class Distortion
+{
 public:
     void SetDrive(float drive) { drive_ = drive; }
     // TODO: SetMode
+    void SetMode(ClipMode mode)
+    {
+        mode_ = mode;
+    }
 
-    float Process(float input) {
+    float Process(float input)
+    {
         const float driven = input * drive_;
         // TODO: modeでHard/Softを切り替える
-        return driven;
+        if (mode_ == ClipMode::Hard)
+        {
+            return std::clamp(driven, -1.0f, 1.0f);
+        }
+
+        return std::tanh(driven);
     }
 
 private:
     float drive_ = 1.0f;
     // TODO: mode_
+    ClipMode mode_ = ClipMode::Hard;
 };
 
-int main() {
+int main()
+{
     Distortion distortion;
     distortion.SetDrive(5.0f);
+    distortion.SetMode(ClipMode::Soft);
     std::cout << distortion.Process(0.4f) << '\n';
 }

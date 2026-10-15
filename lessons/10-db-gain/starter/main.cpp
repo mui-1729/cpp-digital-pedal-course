@@ -1,19 +1,32 @@
-#include <cmath>
 #include <iostream>
+#include <cmath>
 
-float DbToLinear(float db) {
-    // TODO
-    return 0.0f;
+float DbToLinear(float db)
+{
+    return std::pow(10.0f, db / 20.0f);
 }
 
-float LinearToDb(float linear) {
-    // TODO: linear <= 0 の扱いにも注意
-    return 0.0f;
-}
-
-int main() {
-    for (float db : {-6.0f, 0.0f, 6.0f, 12.0f}) {
-        const float linear = DbToLinear(db);
-        std::cout << db << " dB -> " << linear << " -> " << LinearToDb(linear) << " dB\n";
+float LinearToDb(float linear)
+{
+    if (linear <= 0.0f)
+    {
+        return -120.0f;
     }
+
+    return 20.0f * std::log10(linear);
+}
+
+int main()
+{
+    std::cout << LinearToDb(1.0f) << '\n';
+    std::cout << LinearToDb(2.0f) << '\n';
+    std::cout << LinearToDb(0.5f) << '\n';
+
+    // dB → 振幅倍率 → dB
+    float db = -12.0f;
+    float linear = DbToLinear(db);
+
+    std::cout << LinearToDb(linear) << '\n';
+
+    return 0;
 }
